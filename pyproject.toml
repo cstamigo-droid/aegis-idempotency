@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aegis-idempotency"
-version = "0.1.1"
-description = "HTTP client for the AEGIS HITL Reliability Layer — exactly-once human-in-the-loop approvals for AI agents"
+version = "0.1.2"
+description = "Reliability layer for production AI agents: exactly-once execution, HITL approval gates, per-event billing"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"

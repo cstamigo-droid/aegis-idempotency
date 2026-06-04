@@ -7,7 +7,16 @@ from typing import Any
 class AegisClient:
     """HTTP client for the AEGIS HITL Reliability Layer.
 
-    Usage::
+    Hosted API usage (get a free API key at https://aegis-idempotency-production.up.railway.app/docs)::
+
+        async with AegisClient(
+            base_url="https://aegis-idempotency-production.up.railway.app",
+            api_key="sk_live_...",
+            thread_id="order-42",
+        ) as client:
+            response = await client.approve("idempotency-key-123")
+
+    Self-hosted usage::
 
         async with AegisClient(
             base_url="http://localhost:8000",
@@ -15,15 +24,13 @@ class AegisClient:
             thread_id="thr1",
         ) as client:
             response = await client.approve("idempotency-key-123")
-            assert response.status_code == 202
-
-    tenant_id and thread_id can be overridden per call.
     """
 
     def __init__(
         self,
         base_url: str = "http://localhost:8000",
         *,
+        api_key: str | None = None,
         tenant_id: str | None = None,
         thread_id: str | None = None,
         timeout: float = 10.0,
@@ -32,6 +39,7 @@ class AegisClient:
         client: httpx.AsyncClient | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
+        self.api_key = api_key
         self.tenant_id = tenant_id
         self.thread_id = thread_id
         self.timeout = timeout
@@ -55,11 +63,11 @@ class AegisClient:
     def _resolve(self, tenant_id: str | None, thread_id: str | None) -> tuple[str, str]:
         t = tenant_id or self.tenant_id
         th = thread_id or self.thread_id
-        if not t:
-            raise ValueError("tenant_id is required (set on constructor or per call)")
+        if not self.api_key and not t:
+            raise ValueError("tenant_id is required when not using api_key (set on constructor or per call)")
         if not th:
             raise ValueError("thread_id is required (set on constructor or per call)")
-        return t, th
+        return t or "", th
 
     def _headers(
         self,
@@ -67,12 +75,16 @@ class AegisClient:
         thread_id: str,
         idempotency_key: str,
     ) -> dict[str, str]:
-        return {
-            "Tenant-Id": tenant_id,
+        headers: dict[str, str] = {
             "Thread-Id": thread_id,
             "Idempotency-Key": idempotency_key,
             "X-Request-Id": str(uuid.uuid4()),
         }
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        else:
+            headers["Tenant-Id"] = tenant_id
+        return headers
 
     async def _post(
         self,
