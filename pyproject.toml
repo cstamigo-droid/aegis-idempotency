@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aegis-idempotency"
+version = "0.1.1"
+description = "HTTP client for the AEGIS HITL Reliability Layer — exactly-once human-in-the-loop approvals for AI agents"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Cristian Amigo", email = "cstamigo@gmail.com" }]
+keywords = ["hitl", "idempotency", "reliability", "agents", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP",
+]
+dependencies = ["httpx>=0.27"]
+
+[project.urls]
+Homepage = "https://github.com/cstamigo/aegis-idempotency"
+Repository = "https://github.com/cstamigo/aegis-idempotency"
+"Bug Tracker" = "https://github.com/cstamigo/aegis-idempotency/issues"
+
+[tool.setuptools.packages.find]
+include = ["aegis_hitl*"]
+
+[tool.setuptools.package-data]
+"aegis_hitl" = ["py.typed"]
